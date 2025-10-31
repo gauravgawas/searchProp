@@ -27,7 +27,7 @@ function AllDashboard() {
   //Fetch saved groups
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/geometry/getAllGeom", {
+      .get(auth.resourceUrl + "/api/geometry/getAllGeom", {
         headers: {
           Authorization: `Bearer ${auth.token}`,
           "Content-Type": "application/json",

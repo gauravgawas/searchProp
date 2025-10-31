@@ -16,13 +16,10 @@ function Login() {
     e.preventDefault();
     console.log("Login:", { username, password });
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/users/login",
-        {
-          username,
-          password,
-        }
-      );
+      const response = await axios.post(auth.resourceUrl + "/api/users/login", {
+        username,
+        password,
+      });
 
       // Assuming your backend sends a token or user info
       if (response.data.Status == "OK") {

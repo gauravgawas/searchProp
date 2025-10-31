@@ -1,12 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 export default function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
-
+  const auth = useSelector((state: any) => state.auth);
   const navigate = useNavigate();
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ export default function SignUp() {
     }
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/users/register",
+        auth.resourceUrl + "/api/users/register",
         {
           username,
           password,

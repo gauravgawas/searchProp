@@ -29,13 +29,14 @@ function Dashboard() {
   const [details, setDetails] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   const [currentLayer, setCurrentLayer] = useState<L.Layer | null>(null);
+
   //Fetch saved groups
   useEffect(() => {
     const param = {
       username: auth.username,
     };
     axios
-      .post("http://localhost:8080/api/geometry/getMyGeom", param, {
+      .post(auth.resourceUrl + "/api/geometry/getMyGeom", param, {
         headers: {
           Authorization: `Bearer ${auth.token}`,
           "Content-Type": "application/json",
@@ -240,7 +241,7 @@ function Dashboard() {
     };
 
     axios
-      .post("http://localhost:8080/api/geometry/saveGeom", params, {
+      .post(auth.resourceUrl + "/api/geometry/saveGeom", params, {
         headers: {
           Authorization: `Bearer ${auth.token}`,
           "Content-Type": "application/json",

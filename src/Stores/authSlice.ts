@@ -3,11 +3,13 @@ import { createSlice } from "@reduxjs/toolkit";
 interface AuthState {
   username: string | null;
   token: string | null;
+  resourceUrl:string | null;
 }
 
 const initialState: AuthState = {
   username: null,
   token: null,
+  resourceUrl:"https://searchprops-org3.onrender.com",//change url to local when runing locally
 };
 
 const authSlice = createSlice({
