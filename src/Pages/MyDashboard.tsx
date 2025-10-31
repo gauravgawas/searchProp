@@ -145,11 +145,11 @@ function Dashboard() {
       console.warn("No current layer selected to bind info.");
     }
   };
-  const handleLayerEdited = (e: any) => {
+  const handleLayerEdited = () => {
     setShowSaveButton(true);
   };
 
-  const handleLayerDeleted = (e: any) => {
+  const handleLayerDeleted = () => {
     const featureGroup = featureGroupRef.current;
 
     if (featureGroup) {

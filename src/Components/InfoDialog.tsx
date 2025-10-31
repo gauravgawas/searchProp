@@ -1,6 +1,3 @@
-import React from "react";
-import { useState } from "react";
-
 function InfoDialog(props: any) {
   console.log("inside info");
   return (
