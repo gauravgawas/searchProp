@@ -29,7 +29,7 @@ function Dashboard() {
   const [details, setDetails] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   const [currentLayer, setCurrentLayer] = useState<L.Layer | null>(null);
-
+  const mapRef = useRef<L.Map | null>(null);
   //Fetch saved groups
   useEffect(() => {
     const param = {
@@ -171,6 +171,10 @@ function Dashboard() {
   const handleLayerCreated = (e: any) => {
     const layer = e.layer;
 
+    // ✅ If a marker is created, explicitly apply the default icon
+    if (layer instanceof L.Marker) {
+      layer.setIcon(DefaultIcon);
+    }
     setCurrentLayer(layer);
 
     setShowDialog(true);
@@ -273,6 +277,24 @@ function Dashboard() {
           zoom={12}
           scrollWheelZoom
           className="w-full min-h-[91vh] "
+          whenReady={() => {
+            const mapInstance = mapRef.current;
+            if (!mapInstance) return;
+
+            // 🔹 Ensure marker icon shows correctly while drawing
+            mapInstance.on("draw:drawstart", (e: any) => {
+              if (e.layerType === "marker") {
+                L.Marker.prototype.options.icon = DefaultIcon;
+              }
+            });
+
+            // 🔹 Also fix marker icon when layer is added (while dragging)
+            mapInstance.on("layeradd", (e: any) => {
+              if (e.layer instanceof L.Marker) {
+                e.layer.setIcon(DefaultIcon);
+              }
+            });
+          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
