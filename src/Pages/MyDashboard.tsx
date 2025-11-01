@@ -163,13 +163,14 @@ function Dashboard() {
       setShowSaveButton(true);
     }
   };
+  const setDeafultIcon = (e: any) => {
+    if (e.layerType === "marker") {
+      L.Marker.prototype.options.icon = DefaultIcon;
+    }
+  };
   const handleLayerCreated = (e: any) => {
     const layer = e.layer;
 
-    // ✅ If a marker is created, explicitly apply the default icon
-    if (layer instanceof L.Marker) {
-      layer.setIcon(DefaultIcon);
-    }
     setCurrentLayer(layer);
 
     setShowDialog(true);
@@ -286,6 +287,7 @@ function Dashboard() {
                 circle: true,
                 circlemarker: false,
               }}
+              onDrawStart={setDeafultIcon}
               onCreated={handleLayerCreated}
               onEdited={handleLayerEdited}
               onDeleted={handleLayerDeleted}
