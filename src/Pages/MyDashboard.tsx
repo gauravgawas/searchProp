@@ -164,7 +164,13 @@ function Dashboard() {
     }
   };
   const handleLayerCreated = (e: any) => {
-    setCurrentLayer(e.layer);
+    const layer = e.layer;
+
+    // ✅ If a marker is created, explicitly apply the default icon
+    if (layer instanceof L.Marker) {
+      layer.setIcon(DefaultIcon);
+    }
+    setCurrentLayer(layer);
 
     setShowDialog(true);
     // const info = prompt("Enter related information and contact details:");
