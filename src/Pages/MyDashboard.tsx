@@ -1,5 +1,12 @@
-import { useRef, useState, useEffect } from "react";
-import { MapContainer, TileLayer, FeatureGroup } from "react-leaflet";
+import { useRef, useState, useEffect, useCallback } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  FeatureGroup,
+  useMap,
+  Marker,
+  Popup,
+} from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
@@ -11,6 +18,7 @@ import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { useSelector } from "react-redux";
 import InfoDialog from "../Components/InfoDialog";
+import Filters from "../Components/Filters";
 const DefaultIcon = L.icon({
   iconUrl,
   iconRetinaUrl,
@@ -21,6 +29,16 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 function Dashboard() {
+  const [filter, setFilter] = useState<Object | null>({
+    Price: {
+      min: 0,
+      max: 500000000,
+    },
+    Area: {
+      min: 0,
+      max: 50000,
+    },
+  });
   const center: [number, number] = [15.2993, 74.124];
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const [layerGroups, setLayerGroups] = useState<any[]>([]);
@@ -30,6 +48,80 @@ function Dashboard() {
   const [showDialog, setShowDialog] = useState(false);
   const [currentLayer, setCurrentLayer] = useState<L.Layer | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+
+  const userIcon = new L.Icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+    iconSize: [38, 38],
+    iconAnchor: [19, 38], // bottom tip is the anchor point
+    popupAnchor: [0, -38], // popup appears above the pin
+  });
+  function AutoPanToCurrentLocation() {
+    const map = useMap(); // ✅ works only inside <MapContainer>
+    const [position, setPosition] = useState(null);
+
+    useEffect(() => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            const latlng: any = [latitude, longitude];
+            setPosition(latlng);
+            map.setView(latlng, 15);
+          },
+          (err) => console.error("Geolocation error:", err)
+        );
+      }
+    }, [map]);
+
+    return (
+      position && (
+        <Marker position={position} icon={userIcon}>
+          <Popup>You are here</Popup>
+        </Marker>
+      )
+    );
+  }
+  const handleSearch = useCallback(() => {
+    if (!layerGroups.length || !featureGroupRef.current) return;
+
+    const featureGroup = featureGroupRef.current;
+
+    featureGroup.eachLayer((layer: any) => {
+      const info = layer.customInfo || {};
+
+      // Check match for all filter fields
+      const matches =
+        filter &&
+        Object.entries(filter).every(([key, value]) => {
+          if (value === "" || value == null) return true; // ignore empty filters
+
+          // 🏷️ Handle range filters (Price, Area)
+          if (key === "Price" || key === "Area") {
+            const min = value.min ?? 0;
+            const max = value.max ?? Number.MAX_VALUE;
+            const fieldValue = Number(info[key]);
+            return !(fieldValue < min || fieldValue > max);
+          }
+
+          // 🔤 Handle normal string filters (Type, BHK, etc.)
+          return info[key] === value;
+        });
+
+      // 🌐 Show / hide layers based on match result
+      if (matches) {
+        layer.setStyle?.({ opacity: 1, fillOpacity: 0.7 }); // visible for shapes
+        if (layer._icon) layer._icon.style.display = "";
+        if (layer._shadow) layer._shadow.style.display = "";
+      } else {
+        layer.setStyle?.({ opacity: 0, fillOpacity: 0 }); // invisible for shapes
+        if (layer._icon) layer._icon.style.display = "none";
+        if (layer._shadow) layer._shadow.style.display = "none";
+      }
+    });
+
+    // 🔍 Optionally trigger API updates or other map changes
+  }, [filter, layerGroups]);
+
   //Fetch saved groups
   useEffect(() => {
     const param = {
@@ -52,14 +144,6 @@ function Dashboard() {
         }
       })
       .catch(console.error);
-    // .then((res) => {
-    //   const parsed = res.data.map((g: any) => ({
-    //     ...g,
-    //     geometries: JSON.parse(g.geometries),
-    //   }));
-    //   setLayerGroups(parsed);
-    // })
-    // .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -96,17 +180,7 @@ function Dashboard() {
 
         if (layer) {
           (layer as any).customInfo = geo.info;
-          const popupContent = `
-      <div>
-        ${Object.entries(geo.info)
-          .map(
-            ([key, value]) =>
-              `<div><strong>${key}:</strong></div> <div>${value}</div>`
-          )
-          .join("<br>")}
-      </div>
-    `;
-          layer.bindPopup(popupContent);
+          createOnClickListener(layer);
           featureGroup.addLayer(layer);
         }
       });
@@ -115,36 +189,29 @@ function Dashboard() {
 
   function closeDialog() {
     const featureGroup = featureGroupRef.current;
-    if (featureGroup && currentLayer && featureGroup.hasLayer(currentLayer)) {
+    if (
+      featureGroup &&
+      currentLayer &&
+      !(currentLayer as any).customInfo &&
+      featureGroup.hasLayer(currentLayer)
+    ) {
       featureGroup.removeLayer(currentLayer);
     }
     setShowDialog(false);
   }
-  const bindInfoWithElement = () => {
+
+  const bindInfoWithElement = useCallback(() => {
     if (currentLayer) {
       // Attach object as custom data to the layer
       (currentLayer as any).customInfo = details;
 
-      // Optional: bind popup with formatted info for display
-      const popupContent = `
-      <div>
-        ${Object.entries(details)
-          .map(
-            ([key, value]) =>
-              `<div><strong>${key}:</strong></div> <div>${value}</div>`
-          )
-          .join("<br>")}
-      </div>
-    `;
-
-      currentLayer.bindPopup(popupContent);
       setShowDialog(false);
       setShowSaveButton(true);
       console.log("Bound details:", details);
     } else {
       console.warn("No current layer selected to bind info.");
     }
-  };
+  }, [details]);
   const handleLayerEdited = () => {
     setShowSaveButton(true);
   };
@@ -171,33 +238,25 @@ function Dashboard() {
   const handleLayerCreated = (e: any) => {
     const layer = e.layer;
 
-    // ✅ If a marker is created, explicitly apply the default icon
     if (layer instanceof L.Marker) {
       layer.setIcon(DefaultIcon);
     }
+    createOnClickListener(layer);
+
     setCurrentLayer(layer);
 
     setShowDialog(true);
-    // const info = prompt("Enter related information and contact details:");
-
-    // If no info entered → remove the layer
-    // if (!info || info.trim() === "") {
-    //   alert("Information is required to add this layer.");
-
-    //   // Remove the layer from FeatureGroup safely
-    //   const featureGroup = featureGroupRef.current;
-    //   if (featureGroup && featureGroup.hasLayer(layer)) {
-    //     featureGroup.removeLayer(layer);
-    //   }
-    //   return;
-    // }
-
-    // // Otherwise attach info and keep the layer
-    // setShowSaveButton(true);
-    // (layer as any).customInfo = info.trim();
-    // layer.bindPopup(info.trim());
   };
-  // Convert all layers inside feature group to JSON
+
+  const createOnClickListener = (layer: L.Layer) => {
+    layer.on("click", () => {
+      if ((layer as any).customInfo) {
+        setCurrentLayer(layer);
+        setDetails((layer as any).customInfo);
+        setShowDialog(true);
+      }
+    });
+  };
   const handleSaveGroup = () => {
     const featureGroup = featureGroupRef.current;
     if (!featureGroup) return;
@@ -300,7 +359,7 @@ function Dashboard() {
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
+          <AutoPanToCurrentLocation />
           <FeatureGroup ref={featureGroupRef}>
             <EditControl
               position="topleft"
@@ -315,55 +374,6 @@ function Dashboard() {
               onDeleted={handleLayerDeleted}
             />
           </FeatureGroup>
-
-          {/* Show previously saved groups
-          {layerGroups.map((g, idx) =>
-            g.geometries.map((geo: any, i: number) => {
-              if (geo.type === "Point") {
-                const [lat, lng] = geo.coordinates;
-                return (
-                  <Marker key={`${idx}-${i}`} position={[lat, lng]}>
-                    <Popup>{geo.info}</Popup>
-                  </Marker>
-                );
-              } else if (geo.type === "LineString") {
-                return (
-                  <Polyline
-                    key={`${idx}-${i}`}
-                    positions={geo.coordinates.map((c: any) => [c[0], c[1]])}
-                    color="blue"
-                  >
-                    <Popup>{geo.info}</Popup>
-                  </Polyline>
-                );
-              } else if (geo.type === "Polygon") {
-                return (
-                  <Polygon
-                    key={`${idx}-${i}`}
-                    positions={geo.coordinates.map((c: any) => [c[0], c[1]])}
-                    color="green"
-                  >
-                    <Popup>{geo.info}</Popup>
-                  </Polygon>
-                );
-              } else if (geo.type === "Circle") {
-                // Circle has center and radius
-                const [lat, lng] = geo.center;
-                const radius = geo.radius || 100; // fallback if radius missing
-                return (
-                  <Circle
-                    key={`${idx}-${i}`}
-                    center={[lat, lng]}
-                    radius={radius}
-                    color="red"
-                  >
-                    <Popup>{geo.info}</Popup>
-                  </Circle>
-                );
-              }
-              return null;
-            })
-          )} */}
         </MapContainer>
         {showDialog && (
           <InfoDialog
@@ -373,14 +383,24 @@ function Dashboard() {
             saveData={bindInfoWithElement}
           />
         )}
-        {showSaveButton && (
-          <button
-            onClick={handleSaveGroup}
-            className="z-[1000] absolute top-4 right-4 bg-primary text-white px-4 py-2 rounded shadow-lg"
-          >
-            Save
-          </button>
-        )}
+
+        <div className="z-[1000] absolute top-4 right-5">
+          <div className="flex flex-col">
+            <Filters
+              filter={filter}
+              setFilter={setFilter}
+              handleSearch={handleSearch}
+            />
+            {showSaveButton && (
+              <button
+                onClick={handleSaveGroup}
+                className="bg-primary absolute top-20 right-0  text-white  px-6 py-2  rounded shadow-lg"
+              >
+                Save
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </MainLayout>
   );
