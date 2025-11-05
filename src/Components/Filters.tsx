@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from "react";
+import { Filter } from "lucide-react"; // icon (from lucide-react, lightweight)
 
 export default function Filters(props: any) {
-  const [isOpen, setIsOpen] = useState(true); // toggle filter visibility
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -34,7 +35,6 @@ export default function Filters(props: any) {
     [props.filter]
   );
 
-  // Price Ranges (₹)
   const priceRanges = [
     { label: "Below ₹25 Lakh", min: 0, max: 2500000 },
     { label: "₹25 L – ₹50 L", min: 2500000, max: 5000000 },
@@ -43,7 +43,6 @@ export default function Filters(props: any) {
     { label: "Above ₹5 Cr", min: 50000000, max: Infinity },
   ];
 
-  // Area Ranges (sqft)
   const areaRanges = [
     { label: "Below 500 sqft", min: 0, max: 500 },
     { label: "500 – 1000 sqft", min: 500, max: 1000 },
@@ -54,135 +53,144 @@ export default function Filters(props: any) {
   ];
 
   return (
-    <div className="">
-      {/* Toggle Header */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex  bg-primary text-white px-4 py-2 rounded float-end"
-      >
-        Filters
-        <span className="text-xl">{isOpen ? "▲" : "▼"}</span>
-      </button>
-
-      {/* Collapsible Form Section */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-[2000px]  opacity-100" : "max-h-0 opacity-0 w-0"
-        }`}
-      >
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-b-lg shadow-lg p-5 space-y-5"
+    <div className="relative">
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-5 right-5 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-primary-dark transition-all z-50"
         >
-          {/* ----------- Select Filters ----------- */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <select
-              className="bg-primary rounded p-2 text-white"
-              id="Type"
-              value={props.filter.Type}
-              onChange={handleSelectChange}
-            >
-              <option value="">Select Property Type</option>
-              <option>Apartment</option>
-              <option>Villa</option>
-              <option>Independent House</option>
-              <option>Plot</option>
-              <option>Commercial</option>
-              <option>Other</option>
-            </select>
+          <Filter className="w-6 h-6" />
+        </button>
+      )}
 
-            <select
-              className="bg-primary rounded p-2 text-white"
-              id="BHK"
-              value={props.filter.BHK}
-              onChange={handleSelectChange}
-            >
-              <option value="">Select BHK</option>
-              <option>1 BHK</option>
-              <option>2 BHK</option>
-              <option>3 BHK</option>
-              <option>4+ BHK</option>
-            </select>
-
-            <select
-              className="bg-primary rounded p-2 text-white"
-              id="Furnishing"
-              value={props.filter.Furnishing}
-              onChange={handleSelectChange}
-            >
-              <option value="">Select Furnishing</option>
-              <option>Unfurnished</option>
-              <option>Semi-furnished</option>
-              <option>Fully-furnished</option>
-            </select>
-
-            <select
-              className="bg-primary rounded p-2 text-white"
-              id="Status"
-              value={props.filter.Status}
-              onChange={handleSelectChange}
-            >
-              <option value="">Select Status</option>
-              <option>Ready to Move</option>
-              <option>Under Construction</option>
-              <option>New Launch</option>
-            </select>
-          </div>
-
-          {/* ----------- Price Ranges ----------- */}
-          <div className="space-y-2">
-            <label className="font-semibold">Price Range (₹)</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 pl-5">
-              {priceRanges.map((range, index) => (
-                <label key={index} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={
-                      props.filter.Price.min === range.min &&
-                      props.filter.Price.max === range.max
-                    }
-                    onChange={() => handlePriceCheckbox(range)}
-                    className="accent-primary"
-                  />
-                  {range.label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* ----------- Area Ranges ----------- */}
-          <div className="space-y-2">
-            <label className="font-semibold">Area Range (sqft)</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 pl-5">
-              {areaRanges.map((range, index) => (
-                <label key={index} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={
-                      props.filter.Area.min === range.min &&
-                      props.filter.Area.max === range.max
-                    }
-                    onChange={() => handleAreaCheckbox(range)}
-                    className="accent-primary"
-                  />
-                  {range.label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* ----------- Search Button ----------- */}
-          <div className="flex justify-end">
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-end sm:items-center z-50">
+          <div className="bg-white w-full sm:w-[600px] max-h-[90vh] rounded-t-2xl sm:rounded-2xl shadow-xl overflow-y-auto p-5 space-y-6 animate-slide-up relative">
             <button
-              type="submit"
-              className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition"
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="absolute top-3 right-4 text-gray-600 hover:text-primary text-2xl font-bold"
             >
-              Search
+              ×
             </button>
+
+            <h2 className="text-lg font-semibold text-primary text-center">
+              Filters
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                {
+                  id: "Type",
+                  label: "Property Type",
+                  options: [
+                    "Apartment",
+                    "Villa",
+                    "Independent House",
+                    "Plot",
+                    "Commercial",
+                    "Other",
+                  ],
+                },
+                {
+                  id: "BHK",
+                  label: "BHK",
+                  options: ["1 BHK", "2 BHK", "3 BHK", "4+ BHK"],
+                },
+                {
+                  id: "Furnishing",
+                  label: "Furnishing",
+                  options: ["Unfurnished", "Semi-furnished", "Fully-furnished"],
+                },
+                {
+                  id: "Status",
+                  label: "Status",
+                  options: [
+                    "Ready to Move",
+                    "Under Construction",
+                    "New Launch",
+                  ],
+                },
+              ].map((select) => (
+                <div key={select.id} className="flex flex-col">
+                  <select
+                    className="bg-primary rounded-md p-2 text-white w-full focus:outline-none focus:ring-2 focus:ring-primary-dark"
+                    id={select.id}
+                    value={props.filter[select.id]}
+                    onChange={handleSelectChange}
+                  >
+                    <option value="">{`Select ${select.label}`}</option>
+                    {select.options.map((option) => (
+                      <option key={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-semibold text-gray-800">
+                Price Range (₹)
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-1 sm:pl-5">
+                {priceRanges.map((range, index) => (
+                  <label
+                    key={index}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        props.filter.Price.min === range.min &&
+                        props.filter.Price.max === range.max
+                      }
+                      onChange={() => handlePriceCheckbox(range)}
+                      className="accent-primary w-4 h-4"
+                    />
+                    {range.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-semibold text-gray-800">
+                Area Range (sqft)
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-1 sm:pl-5">
+                {areaRanges.map((range, index) => (
+                  <label
+                    key={index}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        props.filter.Area.min === range.min &&
+                        props.filter.Area.max === range.max
+                      }
+                      onChange={() => handleAreaCheckbox(range)}
+                      className="accent-primary w-4 h-4"
+                    />
+                    {range.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3">
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition w-full sm:w-auto"
+              >
+                Search
+              </button>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

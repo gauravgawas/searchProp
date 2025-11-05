@@ -212,16 +212,15 @@ function AllDashboard() {
           <FeatureGroup ref={featureGroupRef}></FeatureGroup>
           <AutoPanToCurrentLocation />
         </MapContainer>
-      </div>
-      {showDialog && (
-        <InfoDialog
-          closeDialog={closeDialog}
-          details={details}
-          readonly={true}
-        />
-      )}
-      <div className="z-[1000] absolute top-32 right-5">
-        <div className="">
+
+        {showDialog && (
+          <InfoDialog
+            closeDialog={closeDialog}
+            details={details}
+            readonly={true}
+          />
+        )}
+        <div className="z-[1000] absolute top-4 right-5">
           <Filters
             filter={filter}
             setFilter={setFilter}

@@ -19,6 +19,7 @@ import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { useSelector } from "react-redux";
 import InfoDialog from "../Components/InfoDialog";
 import Filters from "../Components/Filters";
+import { Save } from "lucide-react";
 const DefaultIcon = L.icon({
   iconUrl,
   iconRetinaUrl,
@@ -385,21 +386,20 @@ function Dashboard() {
         )}
 
         <div className="z-[1000] absolute top-4 right-5">
-          <div className="flex flex-col">
-            <Filters
-              filter={filter}
-              setFilter={setFilter}
-              handleSearch={handleSearch}
-            />
-            {showSaveButton && (
-              <button
-                onClick={handleSaveGroup}
-                className="bg-primary absolute top-20 right-0  text-white  px-6 py-2  rounded shadow-lg"
-              >
-                Save
-              </button>
-            )}
-          </div>
+          <Filters
+            filter={filter}
+            setFilter={setFilter}
+            handleSearch={handleSearch}
+          />
+          {showSaveButton && (
+            <button
+              type="button"
+              onClick={() => handleSaveGroup()}
+              className="relative top-25 right-0 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-primary-dark transition-all z-50"
+            >
+              <Save className="w-6 h-6" />
+            </button>
+          )}
         </div>
       </div>
     </MainLayout>

@@ -21,7 +21,7 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-primary text-white p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <header className="bg-primary text-white p-3 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* === MOBILE VIEW: Logo + Logout === */}
         <div className="flex items-center justify-between md:hidden">
           {/* Logo */}
@@ -80,10 +80,10 @@ export default function MainLayout({
         </div>
 
         {/* === Navigation (middle) === */}
-        <nav className="flex flex-wrap gap-3 md:gap-4 justify-center md:justify-end">
+        <nav className="flex flex-row gap-3 md:gap-4 justify-center md:justify-end">
           <Link
             to="/mydashboard"
-            className={`bg-primary-dark px-4 py-2 text-sm md:text-base text-white rounded shadow-lg hover:bg-primary-light transition text-center ${
+            className={`w-full md:w-max bg-primary-dark px-4 py-2 text-sm md:text-base text-white rounded shadow-lg hover:bg-primary-light transition text-center ${
               isActive("/mydashboard")
                 ? "bg-primary-light shadow-md"
                 : "bg-primary-dark hover:bg-primary-light"
@@ -94,7 +94,7 @@ export default function MainLayout({
 
           <Link
             to="/alldashboard"
-            className={`bg-primary-dark px-4 py-2 text-sm md:text-base text-white rounded shadow-lg hover:bg-primary-light transition text-center ${
+            className={`w-full  md:w-max bg-primary-dark px-4 py-2 text-sm md:text-base text-white rounded shadow-lg hover:bg-primary-light transition text-center ${
               isActive("/alldashboard")
                 ? "bg-primary-light shadow-md"
                 : "bg-primary-dark hover:bg-primary-light"

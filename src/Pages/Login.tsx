@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../Stores/authSlice";
+import logo from "../assets/Logo.png";
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +37,15 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-dark to-secondary-dark p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary-dark to-secondary-dark p-4">
+      <img
+        src={logo}
+        alt="Logo"
+        style={{
+          width: "10rem",
+          height: "10rem",
+        }}
+      />
       <div className="w-full max-w-md p-8 bg-white rounded-2xl ">
         <h2 className="text-3xl font-bold text-center text-primary mb-6">
           Sign In
