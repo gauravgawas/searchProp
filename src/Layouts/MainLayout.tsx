@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../Stores/authSlice";
-import logo from "../assets/Logo.png";
+import logo from "../assets/Logo.webp";
 
 export default function MainLayout({
   children,
