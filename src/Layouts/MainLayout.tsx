@@ -89,7 +89,7 @@ export default function MainLayout({
                 : "bg-primary-dark hover:bg-primary-light"
             } `}
           >
-            My Dashboard
+            My Properties
           </Link>
 
           <Link
@@ -100,7 +100,7 @@ export default function MainLayout({
                 : "bg-primary-dark hover:bg-primary-light"
             }`}
           >
-            All Dashboard
+            All Properties
           </Link>
           <div className="hidden md:block">
             <button
