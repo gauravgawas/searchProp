@@ -1,3 +1,5 @@
+import WhatsApp from "./WhatsApp";
+
 function InfoDialog(props: any) {
   const details = props.details;
 
@@ -203,19 +205,20 @@ function InfoDialog(props: any) {
               htmlFor="contact"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Contact Details
+              Contact No.
             </label>
-            <textarea
+            <input
               disabled={props.readonly}
               id="contact"
+              type="number"
               required
-              value={details.Contact || ""}
+              maxLength={10}
+              value={details.Contact}
               onChange={(e) => handleChange("Contact", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 h-16"
-              placeholder="Enter contact details"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
             />
           </div>
-
+          {props.readonly && <WhatsApp phoneNumber={details.Contact} />}
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-2">
             <button
