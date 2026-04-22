@@ -5,3 +5,11 @@
   font-family: Helvetica, Arial, sans-serif;
   font-size: 20px;
 }
+
+.popout-icon {
+  transition: transform 0.2s ease;
+}
+
+.popout-icon:hover {
+  transform: scale(1.15);
+}
