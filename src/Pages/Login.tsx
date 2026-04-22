@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../Stores/authSlice";
 import logo from "../assets/Logo.webp";
+import userServices from "../Services/userServices";
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,18 +17,15 @@ function Login() {
     e.preventDefault();
     console.log("Login:", { username, password });
     try {
-      const response = await axios.post(auth.resourceUrl + "/api/users/login", {
-        username,
-        password,
-      });
+      const response = await userServices.login(auth, username, password);
 
       // Assuming your backend sends a token or user info
-      if (response.data.Status == "OK") {
+      if (response?.status == 200) {
         navigate("/mydashboard");
         // Save token in localStorage (optional)
-        dispatch(loginSuccess({ username, token: response.data.Token }));
+        dispatch(loginSuccess({ username, token: response?.data?.token }));
       } else {
-        alert("Login failed!" + response.data.Message);
+        alert("Login failed!" + response?.data?.Message);
       }
     } catch (error: any) {
       console.error("Login error:", error.response?.data || error.message);

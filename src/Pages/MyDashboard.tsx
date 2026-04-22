@@ -7,11 +7,12 @@ import {
   Marker,
   Popup,
 } from "react-leaflet";
+import geometryServices from "../Services/geometryServices";
 import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import L from "leaflet";
-import axios from "axios";
+
 import MainLayout from "../Layouts/MainLayout";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
@@ -69,7 +70,7 @@ function Dashboard() {
             setPosition(latlng);
             map.setView(latlng, 15);
           },
-          (err) => console.error("Geolocation error:", err)
+          (err) => console.error("Geolocation error:", err),
         );
       }
     }, [map]);
@@ -125,26 +126,24 @@ function Dashboard() {
 
   //Fetch saved groups
   useEffect(() => {
-    const param = {
-      username: auth.username,
+    const fetchGeometries = async () => {
+      const param = {
+        username: auth.username,
+      };
+      await geometryServices
+        .getMyGeom(auth, param)
+        .then((res) => {
+          if (res.status == 200) {
+            const parsed = res.data.map((g: any) => ({
+              ...g,
+              geometries: JSON.parse(g.geom),
+            }));
+            setLayerGroups(parsed);
+          }
+        })
+        .catch(console.error);
     };
-    axios
-      .post(auth.resourceUrl + "/api/geometry/getMyGeom", param, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then((res) => {
-        if (res.data.Status == "OK") {
-          const parsed = res.data.Data.map((g: any) => ({
-            ...g,
-            geometries: JSON.parse(g.geom),
-          }));
-          setLayerGroups(parsed);
-        }
-      })
-      .catch(console.error);
+    fetchGeometries();
   }, []);
 
   useEffect(() => {
@@ -165,14 +164,14 @@ function Dashboard() {
             geo.coordinates.map((c: any) => [c[0], c[1]]),
             {
               color: "blue",
-            }
+            },
           );
         } else if (geo.type === "Polygon") {
           layer = L.polygon(
             geo.coordinates.map((c: any) => [c[0], c[1]]),
             {
               color: "green",
-            }
+            },
           );
         } else if (geo.type === "Circle") {
           const [lat, lng] = geo.center;
@@ -258,7 +257,7 @@ function Dashboard() {
       }
     });
   };
-  const handleSaveGroup = () => {
+  const handleSaveGroup = async () => {
     const featureGroup = featureGroupRef.current;
     if (!featureGroup) return;
 
@@ -311,19 +310,14 @@ function Dashboard() {
       geom: JSON.stringify(layers),
     };
 
-    axios
-      .post(auth.resourceUrl + "/api/geometry/saveGeom", params, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-          "Content-Type": "application/json",
-        },
-      })
+    await geometryServices
+      .saveGeom(auth, params)
       .then((res) => {
-        if (res.data.Status == "OK") {
+        if (res?.status == 201) {
           setShowSaveButton(false);
           alert("Data saved successfully!");
         } else {
-          alert("Error saving data: " + res.data.Message);
+          alert("Error saving data");
         }
       })
       .catch(console.error);

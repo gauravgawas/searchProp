@@ -7,11 +7,9 @@ import {
   Marker,
   Popup,
 } from "react-leaflet";
-
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import L from "leaflet";
-import axios from "axios";
 import MainLayout from "../Layouts/MainLayout";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
@@ -19,6 +17,7 @@ import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { useSelector } from "react-redux";
 import InfoDialog from "../Components/InfoDialog";
 import Filters from "../Components/Filters";
+import geometryServices from "../Services/geometryServices";
 const DefaultIcon = L.icon({
   iconUrl,
   iconRetinaUrl,
@@ -92,31 +91,29 @@ function AllDashboard() {
     // 🔍 Optionally trigger API updates or other map changes
   }, [filter, layerGroups]);
   useEffect(() => {
-    axios
-      .get(auth.resourceUrl + "/api/geometry/getAllGeom", {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then((res) => {
-        if (res.data.Status == "OK") {
-          const parsed = res.data.Data.map((g: any) => ({
-            ...g,
-            geometries: JSON.parse(g.geom),
-          }));
-          setLayerGroups(parsed);
-        }
-      })
-      .catch(console.error);
-    // .then((res) => {
-    //   const parsed = res.data.map((g: any) => ({
-    //     ...g,
-    //     geometries: JSON.parse(g.geometries),
-    //   }));
-    //   setLayerGroups(parsed);
-    // })
-    // .catch(console.error);
+    const fetchGeometries = async () => {
+      await geometryServices
+        .getAllGeom(auth)
+        .then((res) => {
+          if (res.status == 200) {
+            const parsed = res.data.map((g: any) => ({
+              ...g,
+              geometries: JSON.parse(g.geom),
+            }));
+            setLayerGroups(parsed);
+          }
+        })
+        .catch(console.error);
+      // .then((res) => {
+      //   const parsed = res.data.map((g: any) => ({
+      //     ...g,
+      //     geometries: JSON.parse(g.geometries),
+      //   }));
+      //   setLayerGroups(parsed);
+      // })
+      // .catch(console.error);
+    };
+    fetchGeometries();
   }, []);
   function AutoPanToCurrentLocation() {
     const map = useMap(); // ✅ works only inside <MapContainer>
@@ -131,7 +128,7 @@ function AllDashboard() {
             setPosition(latlng);
             map.setView(latlng, 15);
           },
-          (err) => console.error("Geolocation error:", err)
+          (err) => console.error("Geolocation error:", err),
         );
       }
     }, [map]);
@@ -162,14 +159,14 @@ function AllDashboard() {
             geo.coordinates.map((c: any) => [c[0], c[1]]),
             {
               color: "blue",
-            }
+            },
           );
         } else if (geo.type === "Polygon") {
           layer = L.polygon(
             geo.coordinates.map((c: any) => [c[0], c[1]]),
             {
               color: "green",
-            }
+            },
           );
         } else if (geo.type === "Circle") {
           const [lat, lng] = geo.center;

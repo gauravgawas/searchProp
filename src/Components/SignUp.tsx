@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import userServices from "../Services/userServices";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import logo from "../assets/Logo.webp";
@@ -18,28 +18,27 @@ export default function SignUp() {
       return;
     }
     try {
-      const response = await axios.post(
-        auth.resourceUrl + "/api/users/register",
-        {
-          username,
-          password,
-          email,
-        }
+      const response = await userServices.register(
+        auth,
+        username,
+        password,
+        email,
       );
+      console.log("Registration response:", response);
 
       // Assuming your backend sends a token or user info
-      if (response.data.Status == "OK") {
+      if (response?.status == 201) {
         navigate("/");
-        alert("Registration sucessful, you may login now!");
+        alert("Registration successful, you may login now!");
         // Save token in localStorage (optional)
         // localStorage.setItem("token", response.data.token);
       } else {
-        alert("Registration failed!" + response.data.Message);
+        alert("Registration failed!");
       }
     } catch (error: any) {
       console.error(
         "Registration error:",
-        error.response?.data || error.message
+        error.response?.data || error.message,
       );
       alert("Registration failed!");
     }

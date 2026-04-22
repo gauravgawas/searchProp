@@ -24,7 +24,13 @@ function InfoDialog(props: any) {
         <h2 className="text-lg font-semibold mb-4 text-gray-800">
           Property Information
         </h2>
-
+        {!props.readonly && (
+          <h6 className="font-normal text-gray-600">
+            ( To make your property visible when clients apply filters, make
+            sure to fill maximum details and save the property. )
+          </h6>
+        )}
+        <br />
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Property Title */}
           <div>
@@ -32,7 +38,7 @@ function InfoDialog(props: any) {
               htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Property Title
+              Property Title <span className="text-red-500">*</span>
             </label>
             <input
               disabled={props.readonly}
@@ -52,7 +58,7 @@ function InfoDialog(props: any) {
               htmlFor="type"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Property Type
+              Property Type <span className="text-red-500">*</span>
             </label>
             <select
               disabled={props.readonly}
@@ -86,13 +92,13 @@ function InfoDialog(props: any) {
               value={details.BHK || ""}
               onChange={(e) => handleChange("BHK", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              required
             >
               <option value="">Select BHK</option>
               <option>1 BHK</option>
               <option>2 BHK</option>
               <option>3 BHK</option>
               <option>4+ BHK</option>
+              <option>NA</option>
             </select>
           </div>
 
@@ -108,7 +114,6 @@ function InfoDialog(props: any) {
               disabled={props.readonly}
               id="price"
               type="number"
-              required
               value={details.Price || ""}
               onChange={(e) => handleChange("Price", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
@@ -128,7 +133,6 @@ function InfoDialog(props: any) {
               disabled={props.readonly}
               id="area"
               type="number"
-              required
               value={details.Area || ""}
               onChange={(e) => handleChange("Area", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -154,6 +158,7 @@ function InfoDialog(props: any) {
               <option>Unfurnished</option>
               <option>Semi-furnished</option>
               <option>Fully-furnished</option>
+              <option>NA</option>
             </select>
           </div>
 
@@ -175,6 +180,7 @@ function InfoDialog(props: any) {
               <option>Ready to Move</option>
               <option>Under Construction</option>
               <option>New Launch</option>
+              <option>NA</option>
             </select>
           </div>
 
@@ -189,7 +195,6 @@ function InfoDialog(props: any) {
             <textarea
               disabled={props.readonly}
               id="desc"
-              required
               value={details.Description || ""}
               onChange={(e) => handleChange("Description", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
@@ -203,7 +208,7 @@ function InfoDialog(props: any) {
               htmlFor="contact"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Contact Details
+              Contact Details <span className="text-red-500">*</span>
             </label>
             <textarea
               disabled={props.readonly}
