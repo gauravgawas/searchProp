@@ -9,7 +9,7 @@ interface AuthState {
 const initialState: AuthState = {
   username: null,
   token: null,
-  resourceUrl:"http://54.165.135.9:8080",//change url to local when runing locally
+  resourceUrl:"https://dev.searchprop47.online",//change url to local when runing locally
 };
 
 const authSlice = createSlice({
