@@ -210,7 +210,7 @@ function InfoDialog(props: any) {
               htmlFor="contact"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Contact Details <span className="text-red-500">*</span>
+              Contact Number <span className="text-red-500">*</span>
             </label>
             <input
               disabled={props.readonly}
