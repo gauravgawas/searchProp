@@ -11,7 +11,7 @@ import {
 } from 'redux-persist';
 import storageSession from 'redux-persist/lib/storage/session';
 import authReducer from "./authSlice";
-
+import generalReducer from "./generalSlice";
 const persistConfig = {
   key: 'root', // Key to store in (e.g., 'root' in localStorage)
   storage:storageSession,    // The storage engine (using Local Storage here)
@@ -23,6 +23,7 @@ const persistConfig = {
 };
 const rootReducer = combineReducers({
   auth: authReducer,
+  general: generalReducer,
   // Add other slices here
 });
 

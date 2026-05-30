@@ -18,8 +18,8 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { useSelector } from "react-redux";
-import InfoDialog from "../Components/InfoDialog";
-import Filters from "../Components/Filters";
+import InfoDialog from "./InfoDialog";
+// import Filters from "./Filters";
 import { Save } from "lucide-react";
 const DefaultIcon = L.icon({
   iconUrl,
@@ -31,16 +31,7 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 function Dashboard() {
-  const [filter, setFilter] = useState<Object | null>({
-    Price: {
-      min: 0,
-      max: 500000000,
-    },
-    Area: {
-      min: 0,
-      max: 50000,
-    },
-  });
+  const filter = useSelector((state: any) => state.general.filter);
   const center: [number, number] = [15.2993, 74.124];
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const [layerGroups, setLayerGroups] = useState<any[]>([]);
@@ -83,7 +74,8 @@ function Dashboard() {
       )
     );
   }
-  const handleSearch = useCallback(() => {
+
+  useEffect(() => {
     if (!layerGroups.length || !featureGroupRef.current) return;
 
     const featureGroup = featureGroupRef.current;
@@ -206,7 +198,7 @@ function Dashboard() {
       (currentLayer as any).customInfo = details;
 
       setShowDialog(false);
-      setShowSaveButton(true);
+      handleSaveGroup();
       console.log("Bound details:", details);
     } else {
       console.warn("No current layer selected to bind info.");
@@ -380,18 +372,18 @@ function Dashboard() {
         )}
 
         <div className="z-[1000] absolute top-4 right-5">
-          <Filters
+          {/* <Filters
             filter={filter}
             setFilter={setFilter}
             handleSearch={handleSearch}
-          />
+          /> */}
           {showSaveButton && (
             <button
               type="button"
               onClick={() => handleSaveGroup()}
-              className="relative top-25 right-0 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-primary-dark transition-all z-50"
+              className="relative top-25 right-0 bg-primary text-white  p-2 rounded-lg flex items-center justify-center shadow-lg hover:bg-primary-dark transition-all z-50"
             >
-              <Save className="w-6 h-6" />
+              Save <Save className="ml-1" />
             </button>
           )}
         </div>

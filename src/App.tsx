@@ -1,7 +1,7 @@
-import Login from "./Pages/Login";
+import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
-import MyDashboard from "./Pages/MyDashboard";
-import AllDashboard from "./Pages/AllDashboard";
+import MyDashboard from "./Components/MyDashboard";
+import AllDashboard from "./Components/AllDashboard";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./Stores/store";

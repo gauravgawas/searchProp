@@ -43,4 +43,22 @@ const register = async (
   }
 };
 
-export default { login, register };
+const chatApi = async (auth: any, message: string, sessionId: string) => {
+  try {
+    const response = await axios.post(
+      auth.resourceUrl + "/chat",
+      { message, sessionId },
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error("Chat API error:", error);
+    throw error;
+  }
+};
+export default { login, register, chatApi };

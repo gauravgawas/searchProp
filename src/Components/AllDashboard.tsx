@@ -15,8 +15,9 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { useSelector } from "react-redux";
-import InfoDialog from "../Components/InfoDialog";
-import Filters from "../Components/Filters";
+
+import InfoDialog from "./InfoDialog";
+// import Filters from "./Filters";
 import geometryServices from "../Services/geometryServices";
 const DefaultIcon = L.icon({
   iconUrl,
@@ -33,16 +34,7 @@ const userIcon = new L.Icon({
   popupAnchor: [0, -38], // popup appears above the pin
 });
 function AllDashboard() {
-  const [filter, setFilter] = useState<Object | null>({
-    Price: {
-      min: 0,
-      max: 500000000,
-    },
-    Area: {
-      min: 0,
-      max: 50000,
-    },
-  });
+  const filter = useSelector((state: any) => state.general.filter);
   const center: [number, number] = [15.2993, 74.124];
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const [layerGroups, setLayerGroups] = useState<any[]>([]);
@@ -50,9 +42,8 @@ function AllDashboard() {
   const [details, setDetails] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   //Fetch saved groups
-  const handleSearch = useCallback(() => {
+  useEffect(() => {
     if (!layerGroups.length || !featureGroupRef.current) return;
-
     const featureGroup = featureGroupRef.current;
 
     featureGroup.eachLayer((layer: any) => {
@@ -218,11 +209,11 @@ function AllDashboard() {
           />
         )}
         <div className="z-[1000] absolute top-4 right-5">
-          <Filters
+          {/* <Filters
             filter={filter}
             setFilter={setFilter}
             handleSearch={handleSearch}
-          />
+          /> */}
         </div>
       </div>
     </MainLayout>
