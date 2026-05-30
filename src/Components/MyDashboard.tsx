@@ -91,8 +91,9 @@ function Dashboard() {
 
           // 🏷️ Handle range filters (Price, Area)
           if (key === "Price" || key === "Area") {
-            const min = value.min ?? 0;
-            const max = value.max ?? Number.MAX_VALUE;
+            const rangeValue = value as { min?: number; max?: number };
+            const min = rangeValue.min ?? 0;
+            const max = rangeValue.max ?? Number.MAX_VALUE;
             const fieldValue = Number(info[key]);
             return !(fieldValue < min || fieldValue > max);
           }
