@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import userService from "../Services/userServices";
 import { useDispatch } from "react-redux";
 import { updateFilter } from "../Stores/generalSlice";
-export default function ChatBot({ setFilter, handleSearch }: any) {
+export default function ChatBot({ handleSearch }: any) {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: string; text: string }[]>(
