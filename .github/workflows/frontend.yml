@@ -1,4 +1,4 @@
-name: Deploy Frontend to S3
+name: Frontend Deploy
 
 on:
   push:
@@ -11,27 +11,57 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build project
+      - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_BASE_URL: /api
 
-      - name: Deploy to S3
-        run: aws s3 sync dist s3://searchprop47 --delete
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          
-      - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Upload build to Lightsail
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "dist/*"
+          target: "/home/ubuntu/searchprop-frontend-deploy"
+          strip_components: 1
+          rm: true
+
+      - name: Publish frontend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            set -e
+
+            sudo mkdir -p /var/www/searchprop-frontend/dist
+            sudo rm -rf /var/www/searchprop-frontend/dist/*
+            sudo cp -r /home/ubuntu/searchprop-frontend-deploy/. \
+              /var/www/searchprop-frontend/dist/
+
+            sudo chown -R www-data:www-data \
+              /var/www/searchprop-frontend/dist
+
+            sudo find /var/www/searchprop-frontend/dist \
+              -type d -exec chmod 755 {} \;
+
+            sudo find /var/www/searchprop-frontend/dist \
+              -type f -exec chmod 644 {} \;
+
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            rm -rf /home/ubuntu/searchprop-frontend-deploy
